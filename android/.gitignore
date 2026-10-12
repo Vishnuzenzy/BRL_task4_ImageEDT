@@ -1,0 +1,57 @@
+gradle-wrapper.jar
+/.gradle
+/captures/
+/gradlew
+/gradlew.bat
+/local.properties
+GeneratedPluginRegistrant.java
+.cxx/
+
+# Remember to never publicly share your keystore.
+# See https://flutter.dev/to/reference-keystore
+key.properties
+**/*.keystore
+**/*.jks
+
+.env
+.env.*
+!.env.example
+*.env
+secrets.json
+secrets/
+service-account*.json
+*-service-account*.json
+credentials*.json
+
+# Android signing
+*.jks
+*.keystore
+android/key.properties
+android/local.properties
+
+# iOS signing and provisioning
+*.p12
+*.cer
+*.mobileprovision
+*.certSigningRequest
+
+# Keys and certificates
+*.pem
+*.key
+
+# Firebase / Google (in case it gets added later)
+google-services.json
+GoogleService-Info.plist
+firebase_options.dart
+.firebaserc
+firebase-debug.log
+
+# ---------- Generated / local files ----------
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.idea/
+*.iml
+.vscode/settings.json
+*.log
