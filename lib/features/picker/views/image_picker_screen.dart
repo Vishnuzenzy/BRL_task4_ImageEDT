@@ -44,6 +44,7 @@ class ImagePickerScreen extends ConsumerWidget {
       backgroundColor: background,
       body: Stack(
         children: [
+          // Background decorative circles
           Positioned(
             top: -100,
             left: -100,
@@ -59,124 +60,271 @@ class ImagePickerScreen extends ConsumerWidget {
             left: -80,
             child: _circle(220, const Color(0xFFDCD2FF)),
           ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                'ImageEDT',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: size.width * 0.073,
-                                  fontWeight: FontWeight.w800,
-                                  color: darkText,
-                                  letterSpacing: -1.5,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 7),
-                            const Icon(
-                              Icons.auto_awesome,
-                              color: Color(0xFF9B68FF),
-                              size: 30,
-                            ),
-                          ],
-                        ),
-                      ),
 
-                      IconButton(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Settings coming soon'),
-                            ),
-                          );
-                        },
-                        icon: const Icon(
-                          Icons.settings,
-                          color: darkText,
-                          size: 31,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 0.05),
-                  const Text(
-                    'Turn your moments\ninto something beautiful ✨',
-                    style: TextStyle(
-                      fontSize: 20,
-                      height: 1.5,
-                      color: mutedText,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  const SizedBox(height: 76),
-                  const Text(
-                    'CREATE NEW',
-                    style: TextStyle(
-                      fontSize: 22,
-                      color: darkText,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 22),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.fromLTRB(12, 28, 12, 24),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.82),
-                      borderRadius: BorderRadius.circular(34),
-                    ),
-                    child: Row(
+          // Scrollable main screen prevents RenderFlex overflow
+          SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header
+                    Row(
                       children: [
                         Expanded(
-                          child: _createOption(
-                            icon: Icons.camera_alt_outlined,
-                            label: 'Camera',
-                            color: const Color(0xFFBA8AFF),
-                            onTap: state.isPicking
-                                ? null
-                                : () => _openImage(
-                              context,
-                              ref,
-                              ImageSource.camera,
+                          child: Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  'ImageEDT',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: size.width * 0.073,
+                                    fontWeight: FontWeight.w800,
+                                    color: darkText,
+                                    letterSpacing: -1.5,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 7),
+                              const Icon(
+                                Icons.auto_awesome,
+                                color: Color(0xFF9B68FF),
+                                size: 30,
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Settings coming soon'),
+                              ),
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.settings,
+                            color: darkText,
+                            size: 31,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 0.05),
+
+                    // Subtitle
+                    const Text(
+                      'Turn your moments\ninto something beautiful ✨',
+                      style: TextStyle(
+                        fontSize: 20,
+                        height: 1.5,
+                        color: mutedText,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+
+                    const SizedBox(height: 48),
+
+                    // Create New heading
+                    const Text(
+                      'CREATE NEW',
+                      style: TextStyle(
+                        fontSize: 22,
+                        color: darkText,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+
+                    const SizedBox(height: 22),
+
+                    // Create New options panel
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.fromLTRB(12, 28, 12, 24),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.82),
+                        borderRadius: BorderRadius.circular(34),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _createOption(
+                              icon: Icons.camera_alt_outlined,
+                              label: 'Camera',
+                              color: const Color(0xFFBA8AFF),
+                              onTap: state.isPicking
+                                  ? null
+                                  : () => _openImage(
+                                context,
+                                ref,
+                                ImageSource.camera,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: _createOption(
+                              icon: Icons.image_outlined,
+                              label: 'Photo',
+                              color: const Color(0xFFF46D9B),
+                              onTap: state.isPicking
+                                  ? null
+                                  : () => _openImage(
+                                context,
+                                ref,
+                                ImageSource.gallery,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: _createOption(
+                              icon: Icons.dashboard_customize_outlined,
+                              label: 'Collage',
+                              color: const Color(0xFFFF9865),
+                              onTap: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Collage feature coming soon!',
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Loading indicator
+                    if (state.isPicking) ...[
+                      const SizedBox(height: 18),
+                      const Center(
+                        child: CircularProgressIndicator(color: primary),
+                      ),
+                    ],
+
+                    // Image picker error
+                    if (state.errorMessage != null) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        state.errorMessage!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ],
+
+                    // Space before What's New
+                    const SizedBox(height: 44),
+
+                    // What's New heading and All button
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Flexible(
+                          child: Text(
+                            'WHAT’S NEW',
+                            maxLines: 1,
+                            style: TextStyle(
+                              fontSize: 22,
+                              color: darkText,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
                         ),
-                        Expanded(
-                          child: _createOption(
-                            icon: Icons.image_outlined,
-                            label: 'Photo',
-                            color: const Color(0xFFF46D9B),
-                            onTap: state.isPicking
-                                ? null
-                                : () => _openImage(
-                              context,
-                              ref,
-                              ImageSource.gallery,
-                            ),
+                        TextButton(
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('More features coming soon'),
+                              ),
+                            );
+                          },
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'ALL',
+                                style: TextStyle(
+                                  fontSize: 19,
+                                  color: mutedText,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              Icon(
+                                Icons.chevron_right,
+                                color: mutedText,
+                                size: 28,
+                              ),
+                            ],
                           ),
                         ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Equal-width feature cards
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Expanded(
-                          child: _createOption(
-                            icon: Icons.dashboard_customize_outlined,
-                            label: 'Collage',
-                            color: const Color(0xFFFF9865),
+                          child: _featureCard(
+                            title: 'Filters',
+                            subtitle: 'Give your photos\na new vibe',
+                            color: const Color(0xFFDCE6FF),
+                            illustration: const Icon(
+                              Icons.tune,
+                              size: 52,
+                              color: Color(0xFF7866EF),
+                            ),
                             onTap: () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text(
-                                    'Collage feature coming soon!',
-                                  ),
+                                  content: Text('Filters coming soon'),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _featureCard(
+                            title: 'Stickers',
+                            subtitle: 'Add fun to\nyour pictures',
+                            color: const Color(0xFFFFF0D7),
+                            illustration: const Icon(
+                              Icons.emoji_emotions,
+                              size: 52,
+                              color: Color(0xFFFFA62B),
+                            ),
+                            onTap: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Stickers coming soon'),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _featureCard(
+                            title: 'Templates',
+                            subtitle: 'Ready to use\ncreative layouts',
+                            color: const Color(0xFFFFDFF2),
+                            illustration: const Icon(
+                              Icons.photo_library_outlined,
+                              size: 52,
+                              color: Color(0xFFDC65C2),
+                            ),
+                            onTap: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Templates coming soon'),
                                 ),
                               );
                             },
@@ -184,128 +332,10 @@ class ImagePickerScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-                  ),
-                  if (state.isPicking) ...[
-                    const SizedBox(height: 18),
-                    const Center(
-                      child: CircularProgressIndicator(color: primary),
-                    ),
-                  ],
-                  if (state.errorMessage != null) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      state.errorMessage!,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  ],
-                  const SizedBox(height: 68),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'WHAT’S NEW',
-                        style: TextStyle(
-                          fontSize: 22,
-                          color: darkText,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('More features coming soon'),
-                            ),
-                          );
-                        },
-                        child: const Row(
-                          children: [
-                            Text(
-                              'ALL',
-                              style: TextStyle(
-                                fontSize: 19,
-                                color: mutedText,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            Icon(
-                              Icons.chevron_right,
-                              color: mutedText,
-                              size: 28,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: _featureCard(
-                          title: 'Filters',
-                          subtitle: 'Give your photos\na new vibe',
-                          color: const Color(0xFFDCE6FF),
-                          illustration: const Icon(
-                            Icons.tune,
-                            size: 76,
-                            color: Color(0xFF7866EF),
-                          ),
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Filters coming soon'),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _featureCard(
-                          title: 'Stickers',
-                          subtitle: 'Add fun to\nyour pictures',
-                          color: const Color(0xFFFFF0D7),
-                          illustration: const Icon(
-                            Icons.emoji_emotions,
-                            size: 76,
-                            color: Color(0xFFFFA62B),
-                          ),
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Stickers coming soon'),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _featureCard(
-                          title: 'Templates',
-                          subtitle: 'Ready to use\ncreative layouts',
-                          color: const Color(0xFFFFDFF2),
-                          illustration: const Icon(
-                            Icons.photo_library_outlined,
-                            size: 76,
-                            color: Color(0xFFDC65C2),
-                          ),
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Templates coming soon'),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 34),
 
-                ],
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
             ),
           ),
@@ -314,6 +344,7 @@ class ImagePickerScreen extends ConsumerWidget {
     );
   }
 
+  // Decorative background circle
   Widget _circle(double size, Color color) {
     return Container(
       width: size,
@@ -325,6 +356,7 @@ class ImagePickerScreen extends ConsumerWidget {
     );
   }
 
+  // Camera, Photo and Collage options
   Widget _createOption({
     required IconData icon,
     required String label,
@@ -373,6 +405,7 @@ class ImagePickerScreen extends ConsumerWidget {
     );
   }
 
+  // Uniform feature cards
   Widget _featureCard({
     required String title,
     required String subtitle,
@@ -380,41 +413,50 @@ class ImagePickerScreen extends ConsumerWidget {
     required Widget illustration,
     required VoidCallback onTap,
   }) {
-    return Material(
-      color: color.withValues(alpha: 0.8),
-      borderRadius: BorderRadius.circular(24),
-      child: InkWell(
-        onTap: onTap,
+    return SizedBox(
+      height: 180,
+      child: Material(
+        color: color.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(24),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 10, 6, 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: 65,
-                width: double.infinity,
-                child: Center(child: illustration),
-              ),
-              const SizedBox(height: 13),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 17,
-                  color: darkText,
-                  fontWeight: FontWeight.w700,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(10, 12, 10, 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: 60,
+                  width: double.infinity,
+                  child: Center(child: illustration),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  fontSize: 14,
-                  height: 1.5,
-                  color: mutedText,
+                const SizedBox(height: 8),
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    color: darkText,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 8),
+                Expanded(
+                  child: Text(
+                    subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      height: 1.5,
+                      color: mutedText,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
