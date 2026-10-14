@@ -1,422 +1,417 @@
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../viewmodels/picker_viewmodel.dart';
+import 'image_editor_screen.dart';
 
 class ImagePickerScreen extends ConsumerWidget {
   const ImagePickerScreen({super.key});
 
   static const Color primary = Color(0xFF4F46E5);
-  static const Color background = Color(0xFFF7F7FF);
-  static const Color cardColor = Colors.white;
-  static const Color textColor = Color(0xFF172033);
-  static const Color secondary = Color(0xFF777D91);
+  static const Color background = Color(0xFFEDE9FF);
+  static const Color darkText = Color(0xFF30216F);
+  static const Color mutedText = Color(0xFF7776AD);
+
+  Future<void> _openImage(
+      BuildContext context,
+      WidgetRef ref,
+      ImageSource source,
+      ) async {
+    final image = await ref
+        .read(pickerViewModelProvider.notifier)
+        .pickImage(source);
+
+    if (!context.mounted || image == null) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ImageEditorScreen(imagePath: image.path),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(pickerViewModelProvider);
-    final viewModel = ref.read(pickerViewModelProvider.notifier);
+    final size = MediaQuery.sizeOf(context);
 
     return Scaffold(
       backgroundColor: background,
-      appBar: AppBar(
-        backgroundColor: cardColor,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        titleSpacing: 20,
-        title: Row(
-          children: [
-            Container(
-              height: 36,
-              width: 36,
-              decoration: BoxDecoration(
-                color: primary,
-                borderRadius: BorderRadius.circular(11),
-              ),
-              child: const Icon(
-                Icons.camera_alt_rounded,
-                color: Colors.white,
-                size: 21,
-              ),
-            ),
-            const SizedBox(width: 10),
-            const Text(
-              'PixelCraft',
-              style: TextStyle(
-                color: textColor,
-                fontSize: 19,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            onPressed: () => _showComingSoon(context, 'History'),
-            icon: const Icon(Icons.history_rounded),
-            color: textColor,
+      body: Stack(
+        children: [
+          Positioned(
+            top: -100,
+            left: -100,
+            child: _circle(250, const Color(0xFFD4C5FF)),
           ),
-          IconButton(
-            onPressed: () => _showComingSoon(context, 'Settings'),
-            icon: const Icon(Icons.tune_rounded),
-            color: textColor,
+          Positioned(
+            right: -120,
+            top: 280,
+            child: _circle(240, const Color(0xFFDAD0FF)),
           ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 18, 16, 24),
-          children: [
-            const Text(
-              'Your creative space',
-              style: TextStyle(
-                fontSize: 25,
-                fontWeight: FontWeight.w800,
-                color: textColor,
-              ),
-            ),
-            const SizedBox(height: 6),
-            const Text(
-              'Choose a photo and make it yours.',
-              style: TextStyle(
-                color: secondary,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 22),
-
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: primary.withValues(alpha: 0.06),
-                    blurRadius: 20,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-              ),
+          Positioned(
+            bottom: -100,
+            left: -80,
+            child: _circle(220, const Color(0xFFDCD2FF)),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      const Icon(
-                        Icons.photo_library_outlined,
-                        color: primary,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text(
-                          'Selected photo',
-                          style: TextStyle(
-                            color: textColor,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      if (state.selectedImage != null)
-                        IconButton(
-                          visualDensity: VisualDensity.compact,
-                          onPressed: viewModel.clearImage,
-                          icon: const Icon(Icons.close_rounded),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: AspectRatio(
-                      aspectRatio: 1.05,
-                      child: state.selectedImage == null
-                          ? Container(
-                        color: const Color(0xFFEEEEFF),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                      Expanded(
+                        child: Row(
                           children: [
-                            Container(
-                              height: 76,
-                              width: 76,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(23),
-                              ),
-                              child: const Icon(
-                                Icons.add_photo_alternate_outlined,
-                                size: 42,
-                                color: primary,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Your next masterpiece starts here',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: textColor,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
+                            Flexible(
+                              child: Text(
+                                'ImageEDT',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: size.width * 0.073,
+                                  fontWeight: FontWeight.w800,
+                                  color: darkText,
+                                  letterSpacing: -1.5,
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              'Select an image from your gallery',
-                              style: TextStyle(
-                                color: secondary,
-                                fontSize: 12,
-                              ),
+                            const SizedBox(width: 7),
+                            const Icon(
+                              Icons.auto_awesome,
+                              color: Color(0xFF9B68FF),
+                              size: 30,
                             ),
                           ],
                         ),
-                      )
-                          : Image.file(
-                        File(state.selectedImage!.path),
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Center(
-                          child: Icon(
-                            Icons.broken_image_outlined,
-                            size: 48,
-                            color: secondary,
+                      ),
+
+                      IconButton(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Settings coming soon'),
+                            ),
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.settings,
+                          color: darkText,
+                          size: 31,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 0.05),
+                  const Text(
+                    'Turn your moments\ninto something beautiful ✨',
+                    style: TextStyle(
+                      fontSize: 20,
+                      height: 1.5,
+                      color: mutedText,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  const SizedBox(height: 76),
+                  const Text(
+                    'CREATE NEW',
+                    style: TextStyle(
+                      fontSize: 22,
+                      color: darkText,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(12, 28, 12, 24),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.82),
+                      borderRadius: BorderRadius.circular(34),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _createOption(
+                            icon: Icons.camera_alt_outlined,
+                            label: 'Camera',
+                            color: const Color(0xFFBA8AFF),
+                            onTap: state.isPicking
+                                ? null
+                                : () => _openImage(
+                              context,
+                              ref,
+                              ImageSource.camera,
+                            ),
                           ),
                         ),
-                      ),
+                        Expanded(
+                          child: _createOption(
+                            icon: Icons.image_outlined,
+                            label: 'Photo',
+                            color: const Color(0xFFF46D9B),
+                            onTap: state.isPicking
+                                ? null
+                                : () => _openImage(
+                              context,
+                              ref,
+                              ImageSource.gallery,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: _createOption(
+                            icon: Icons.dashboard_customize_outlined,
+                            label: 'Collage',
+                            color: const Color(0xFFFF9865),
+                            onTap: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Collage feature coming soon!',
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-
-                  if (state.selectedImage != null) ...[
+                  if (state.isPicking) ...[
+                    const SizedBox(height: 18),
+                    const Center(
+                      child: CircularProgressIndicator(color: primary),
+                    ),
+                  ],
+                  if (state.errorMessage != null) ...[
                     const SizedBox(height: 12),
                     Text(
-                      state.selectedImage!.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: textColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-
-                  const SizedBox(height: 14),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: FilledButton.icon(
-                      onPressed: state.isPicking
-                          ? null
-                          : viewModel.pickImage,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: primary,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(13),
-                        ),
-                      ),
-                      icon: state.isPicking
-                          ? const SizedBox(
-                        height: 19,
-                        width: 19,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                          : const Icon(Icons.auto_awesome_rounded),
-                      label: Text(
-                        state.isPicking
-                            ? 'Opening Gallery...'
-                            : state.selectedImage == null
-                            ? 'Open Gallery'
-                            : 'Choose Another Photo',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  if (state.errorMessage != null) ...[
-                    const SizedBox(height: 10),
-                    Text(
                       state.errorMessage!,
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontSize: 13,
-                      ),
+                      style: const TextStyle(color: Colors.red),
                     ),
                   ],
+                  const SizedBox(height: 68),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'WHAT’S NEW',
+                        style: TextStyle(
+                          fontSize: 22,
+                          color: darkText,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('More features coming soon'),
+                            ),
+                          );
+                        },
+                        child: const Row(
+                          children: [
+                            Text(
+                              'ALL',
+                              style: TextStyle(
+                                fontSize: 19,
+                                color: mutedText,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Icon(
+                              Icons.chevron_right,
+                              color: mutedText,
+                              size: 28,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: _featureCard(
+                          title: 'Filters',
+                          subtitle: 'Give your photos\na new vibe',
+                          color: const Color(0xFFDCE6FF),
+                          illustration: const Icon(
+                            Icons.tune,
+                            size: 76,
+                            color: Color(0xFF7866EF),
+                          ),
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Filters coming soon'),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _featureCard(
+                          title: 'Stickers',
+                          subtitle: 'Add fun to\nyour pictures',
+                          color: const Color(0xFFFFF0D7),
+                          illustration: const Icon(
+                            Icons.emoji_emotions,
+                            size: 76,
+                            color: Color(0xFFFFA62B),
+                          ),
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Stickers coming soon'),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _featureCard(
+                          title: 'Templates',
+                          subtitle: 'Ready to use\ncreative layouts',
+                          color: const Color(0xFFFFDFF2),
+                          illustration: const Icon(
+                            Icons.photo_library_outlined,
+                            size: 76,
+                            color: Color(0xFFDC65C2),
+                          ),
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Templates coming soon'),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 34),
+
                 ],
               ),
             ),
-
-            const SizedBox(height: 22),
-
-            const Text(
-              'Quick tools',
-              style: TextStyle(
-                color: textColor,
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            Row(
-              children: [
-                Expanded(
-                  child: _ToolCard(
-                    icon: Icons.crop_rotate_rounded,
-                    title: 'Crop & Rotate',
-                    subtitle: 'Frame your photo',
-                    onTap: () => _showComingSoon(context, 'Crop & Rotate'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _ToolCard(
-                    icon: Icons.tune_rounded,
-                    title: 'Adjust',
-                    subtitle: 'Light and color',
-                    onTap: () => _showComingSoon(context, 'Adjust & Filters'),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            Row(
-              children: [
-                Expanded(
-                  child: _ToolCard(
-                    icon: Icons.palette_outlined,
-                    title: 'Filters',
-                    subtitle: 'Find your style',
-                    onTap: () => _showComingSoon(context, 'Filters'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _ToolCard(
-                    icon: Icons.save_alt_rounded,
-                    title: 'Export',
-                    subtitle: 'Save your result',
-                    onTap: () => _showComingSoon(context, 'Export'),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: primary,
-        unselectedItemColor: secondary,
-        selectedFontSize: 11,
-        unselectedFontSize: 11,
-        currentIndex: 0,
-        elevation: 10,
-        onTap: (index) {
-          if (index != 0) {
-            const labels = ['Import', 'Adjust', 'Crop', 'History'];
-            _showComingSoon(context, labels[index]);
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.photo_library_outlined),
-            activeIcon: Icon(Icons.photo_library_rounded),
-            label: 'Import',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.tune_rounded),
-            label: 'Adjust',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.crop_rounded),
-            label: 'Crop',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history_rounded),
-            label: 'History',
           ),
         ],
       ),
     );
   }
 
-  static void _showComingSoon(BuildContext context, String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$feature will be connected in the next step.'),
-        behavior: SnackBarBehavior.floating,
+  Widget _circle(double size, Color color) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.42),
+        shape: BoxShape.circle,
       ),
     );
   }
-}
 
-class _ToolCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  const _ToolCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
+  Widget _createOption({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback? onTap,
+  }) {
+    return Opacity(
+      opacity: onTap == null ? 0.6 : 1,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
+        child: Column(
+          children: [
+            Container(
+              width: 90,
+              height: 90,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    color.withValues(alpha: 0.78),
+                    color,
+                  ],
+                ),
+              ),
+              child: Icon(
+                icon,
+                color: Colors.white,
+                size: 51,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 19,
+                color: mutedText,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _featureCard({
+    required String title,
+    required String subtitle,
+    required Color color,
+    required Widget illustration,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: color.withValues(alpha: 0.8),
+      borderRadius: BorderRadius.circular(24),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
         child: Padding(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.fromLTRB(8, 10, 6, 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEEEEFF),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  icon,
-                  color: ImagePickerScreen.primary,
-                  size: 22,
-                ),
+              SizedBox(
+                height: 65,
+                width: double.infinity,
+                child: Center(child: illustration),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 13),
               Text(
                 title,
                 style: const TextStyle(
-                  color: ImagePickerScreen.textColor,
-                  fontSize: 14,
+                  fontSize: 17,
+                  color: darkText,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               Text(
                 subtitle,
                 style: const TextStyle(
-                  color: ImagePickerScreen.secondary,
-                  fontSize: 11,
+                  fontSize: 14,
+                  height: 1.5,
+                  color: mutedText,
                 ),
               ),
             ],

@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,16 +18,15 @@ class ImageEDTApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'PixelCraft',
+      title: 'PixelCraft',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFF7F7FF),
+        scaffoldBackgroundColor: const Color(0xFFEDE9FF),
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF4F46E5),
           brightness: Brightness.light,
         ),
-        fontFamily: 'Roboto',
       ),
       home: const ImagePickerScreen(),
     );

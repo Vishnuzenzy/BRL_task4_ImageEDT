@@ -1,3 +1,4 @@
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -18,11 +19,10 @@ class PickerState {
     PickedImage? selectedImage,
     bool? isPicking,
     String? errorMessage,
-    bool clearImage = false,
     bool clearError = false,
   }) {
     return PickerState(
-      selectedImage: clearImage ? null : selectedImage ?? this.selectedImage,
+      selectedImage: selectedImage ?? this.selectedImage,
       isPicking: isPicking ?? this.isPicking,
       errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
     );
@@ -40,7 +40,7 @@ class PickerViewModel extends Notifier<PickerState> {
   @override
   PickerState build() => const PickerState();
 
-  Future<void> pickImage() async {
+  Future<PickedImage?> pickImage(ImageSource source) async {
     state = state.copyWith(
       isPicking: true,
       clearError: true,
@@ -48,31 +48,32 @@ class PickerViewModel extends Notifier<PickerState> {
 
     try {
       final image = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
+        source: source,
         imageQuality: 95,
       );
 
       if (image == null) {
         state = state.copyWith(isPicking: false);
-        return;
+        return null;
       }
 
-      state = state.copyWith(
-        selectedImage: PickedImage(file: image),
-        isPicking: false,
-      );
-    } catch (e) {
-      state = state.copyWith(
-        isPicking: false,
-        errorMessage: 'Unable to select the image. Please try again.',
-      );
-    }
-  }
+      final pickedImage = PickedImage(file: image);
 
-  void clearImage() {
-    state = state.copyWith(
-      clearImage: true,
-      clearError: true,
-    );
+      state = state.copyWith(
+        selectedImage: pickedImage,
+        isPicking: false,
+      );
+
+      return pickedImage;
+    } catch (_) {
+      state = state.copyWith(
+        isPicking: false,
+        errorMessage: source == ImageSource.camera
+            ? 'Unable to open camera. Please try again.'
+            : 'Unable to select the image. Please try again.',
+      );
+
+      return null;
+    }
   }
 }
