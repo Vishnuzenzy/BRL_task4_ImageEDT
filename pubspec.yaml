@@ -17,6 +17,8 @@ dependencies:
   image_cropper: ^13.0.0
   gal: ^2.3.3
   path_provider: ^2.1.6
+  firebase_core: ^5.0.0
+  firebase_auth: ^7.0.0
 
 dev_dependencies:
   flutter_test:
