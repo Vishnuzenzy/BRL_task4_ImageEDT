@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/editor_state.dart';
+import '../models/edit_state.dart';
 
 class EditorNotifier extends Notifier<EditorState> {
   @override
@@ -39,7 +40,10 @@ class EditorNotifier extends Notifier<EditorState> {
     final turns = (state.edits.quarterTurns + 3) % 4;
     state = state.copyWith(edits: state.edits.copyWith(quarterTurns: turns));
   }
-
+  
+  void setFilter(FilterPreset filter) {
+    state = state.copyWith(edits: state.edits.copyWith(filter: filter));
+  }
   void applyCrop(Uint8List cropped) {
     state = state.copyWith(current: cropped);
   }
