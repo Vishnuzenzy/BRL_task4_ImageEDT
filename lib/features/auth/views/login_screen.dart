@@ -1,53 +1,56 @@
 import 'package:flutter/material.dart';
- 
-   import '../../picker/views/image_picker_screen.dart';
+
+import '../../picker/views/image_picker_screen.dart';
 import '../data/auth_service.dart';
- 
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
- 
+
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
- 
+
 class _LoginScreenState extends State<LoginScreen> {
   static const Color primary = Color(0xFF4F46E5);
   static const Color background = Color(0xFFEDE9FF);
   static const Color darkText = Color(0xFF30216F);
   static const Color mutedText = Color(0xFF7776AD);
- 
+
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmController = TextEditingController();
   final _auth = AuthService();
- 
+
   bool _loading = false;
   bool _hidePassword = true;
+  bool _isSignUp = false;
   String? _error;
- 
+
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmController.dispose();
     super.dispose();
   }
- 
-  Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+
+  void _goToApp() {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const ImagePickerScreen()),
+      (route) => false,
+    );
+  }
+
+  Future<void> _run(Future<bool> Function() action) async {
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
-      await _auth.signIn(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-      );
+      final ok = await action();
       if (!mounted) return;
-      Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const ImagePickerScreen()),
-        (route) => false,
-      );
+      if (ok) _goToApp();
     } on AuthException catch (e) {
       if (mounted) setState(() => _error = e.message);
     } catch (_) {
@@ -56,7 +59,31 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) setState(() => _loading = false);
     }
   }
- 
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    await _run(() async {
+      if (_isSignUp) {
+        await _auth.signUp(email: email, password: password);
+      } else {
+        await _auth.signIn(email: email, password: password);
+      }
+      return true;
+    });
+  }
+
+  Future<void> _google() => _run(_auth.signInWithGoogle);
+
+  void _toggleMode() {
+    setState(() {
+      _isSignUp = !_isSignUp;
+      _error = null;
+      _formKey.currentState?.reset();
+    });
+  }
+
   InputDecoration _decoration(String label, IconData icon, {Widget? suffix}) {
     return InputDecoration(
       labelText: label,
@@ -70,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
- 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,20 +115,22 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Welcome back',
-                  style: TextStyle(
+                Text(
+                  _isSignUp ? 'Create account' : 'Welcome back',
+                  style: const TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.w800,
                     color: darkText,
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'Log in to continue editing',
-                  style: TextStyle(color: mutedText, fontSize: 15),
+                Text(
+                  _isSignUp
+                      ? 'Sign up to start editing'
+                      : 'Log in to continue editing',
+                  style: const TextStyle(color: mutedText, fontSize: 15),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 28),
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -140,12 +169,31 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
+                if (_isSignUp) ...[
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _confirmController,
+                    obscureText: _hidePassword,
+                    decoration: _decoration(
+                      'Confirm password',
+                      Icons.lock_outline,
+                    ),
+                    validator: (v) {
+                      if (v != _passwordController.text) {
+                        return 'Passwords do not match';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
                 if (_error != null) ...[
                   const SizedBox(height: 14),
-                  Text(_error!,
-                      style: const TextStyle(color: Color(0xFFD32F2F))),
+                  Text(
+                    _error!,
+                    style: const TextStyle(color: Color(0xFFD32F2F)),
+                  ),
                 ],
-                const SizedBox(height: 28),
+                const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
                   height: 56,
@@ -166,11 +214,63 @@ class _LoginScreenState extends State<LoginScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text(
-                            'Log in',
-                            style: TextStyle(
-                                fontSize: 17, fontWeight: FontWeight.w700),
+                        : Text(
+                            _isSignUp ? 'Create account' : 'Log in',
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Row(
+                  children: [
+                    Expanded(child: Divider(color: mutedText)),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      child: Text('or', style: TextStyle(color: mutedText)),
+                    ),
+                    Expanded(child: Divider(color: mutedText)),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: darkText,
+                      side: BorderSide.none,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                    ),
+                    onPressed: _loading ? null : _google,
+                    icon: const Icon(Icons.g_mobiledata, size: 34),
+                    label: const Text(
+                      'Continue with Google',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: TextButton(
+                    onPressed: _loading ? null : _toggleMode,
+                    child: Text(
+                      _isSignUp
+                          ? 'Already have an account? Log in'
+                          : "Don't have an account? Create one",
+                      style: const TextStyle(
+                        color: primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -181,4 +281,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
- 
