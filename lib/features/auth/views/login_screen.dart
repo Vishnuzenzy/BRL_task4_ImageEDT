@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
  
-import '../../dashboard/views/dashboard_screen.dart';
+   import '../../picker/views/image_picker_screen.dart';
 import '../data/auth_service.dart';
  
 class LoginScreen extends StatefulWidget {
@@ -45,7 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+          MaterialPageRoute(builder: (_) => const ImagePickerScreen()),
         (route) => false,
       );
     } on AuthException catch (e) {
