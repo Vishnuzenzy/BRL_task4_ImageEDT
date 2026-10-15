@@ -1,6 +1,8 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
  
+import '../../export/data/export_service.dart';
+import '../../export/data/image_renderer.dart';
 import '../data/color_matrix.dart';
 import '../data/crop_rotate_service.dart';
 import '../viewmodels/editor_notifier.dart';
@@ -19,8 +21,11 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
   static const Color _bar = Color(0xFF242424);
  
   final CropRotateService _cropService = CropRotateService();
+  final ImageRenderer _renderer = ImageRenderer();
+  final ExportService _exportService = ExportService();
  
   bool _isCropping = false;
+  bool _isExporting = false;
  
   Future<void> _cropImage() async {
     final imageBytes = ref.read(editorProvider).current;
@@ -64,11 +69,41 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
         .showSnackBar(const SnackBar(content: Text('Image reset to original')));
   }
  
-  void _export() {
-    // TODO: connect to ExportService.save() once saving is implemented.
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Save feature coming soon')),
-    );
+  Future<void> _export() async {
+    final state = ref.read(editorProvider);
+    final bytes = state.current;
+ 
+    if (bytes == null || _isExporting) return;
+ 
+    setState(() => _isExporting = true);
+ 
+    try {
+      final rendered = await _renderer.render(bytes, state.edits);
+      final result = await _exportService.save(rendered);
+ 
+      if (!mounted) return;
+ 
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.message),
+          backgroundColor:
+              result.success ? Colors.green.shade700 : Colors.red.shade700,
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+ 
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not process the image: $error'),
+          backgroundColor: Colors.red.shade700,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isExporting = false);
+      }
+    }
   }
  
   @override
@@ -76,7 +111,7 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
     final editorState = ref.watch(editorProvider);
     final imageBytes = editorState.current;
     final edits = editorState.edits;
-    final busy = _isCropping;
+    final busy = _isCropping || _isExporting;
  
     return Scaffold(
       backgroundColor: _bg,
@@ -140,7 +175,25 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
                         ),
                       ),
                       if (busy)
-                        const CircularProgressIndicator(color: Colors.white),
+                        Container(
+                          color: Colors.black38,
+                          alignment: Alignment.center,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                              if (_isExporting) ...[
+                                const SizedBox(height: 12),
+                                const Text(
+                                  'Saving…',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
                     ],
                   ),
                 ),
