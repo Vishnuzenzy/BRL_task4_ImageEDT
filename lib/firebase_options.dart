@@ -48,7 +48,6 @@ class DefaultFirebaseOptions {
     databaseURL: 'https://titan-39ae8-default-rtdb.firebaseio.com',
     storageBucket: 'titan-39ae8.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCYwEgK8ocgnQ2poN1LbjDRv4V6r_iM1Kc',
     appId: '1:249272188711:ios:add192a1490bc1b3eaf302',
