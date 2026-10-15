@@ -1,6 +1,4 @@
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -21,18 +19,59 @@ class ImagePickerScreen extends ConsumerWidget {
       WidgetRef ref,
       ImageSource source,
       ) async {
-    final image = await ref
-        .read(pickerViewModelProvider.notifier)
-        .pickImage(source);
+    try {
+      await ref
+          .read(pickerViewModelProvider.notifier)
+          .pickImage(source);
 
-    if (!context.mounted || image == null) return;
+      if (!context.mounted) return;
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ImageEditorScreen(imagePath: image.path),
-      ),
-    );
+      final state = ref.read(pickerViewModelProvider);
+
+      // The ViewModel should handle errors and loading state.
+      // Navigate to the editor only when an image was selected.
+      // If your ViewModel returns XFile? from pickImage, use:
+      // final image = await ref.read(...).pickImage(source);
+    } catch (e) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Unable to open image: $e'),
+        ),
+      );
+    }
+  }
+
+  Future<void> _selectAndEditImage(
+      BuildContext context,
+      WidgetRef ref,
+      ImageSource source,
+      ) async {
+    try {
+      final image = await ref
+          .read(pickerViewModelProvider.notifier)
+          .pickImage(source);
+
+      if (!context.mounted || image == null) return;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ImageEditorScreen(
+            imagePath: image.path,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Unable to select image: $e'),
+        ),
+      );
+    }
   }
 
   @override
@@ -44,28 +83,44 @@ class ImagePickerScreen extends ConsumerWidget {
       backgroundColor: background,
       body: Stack(
         children: [
-          // Background decorative circles
+          // Decorative background circles
           Positioned(
             top: -100,
             left: -100,
-            child: _circle(250, const Color(0xFFD4C5FF)),
+            child: _circle(
+              250,
+              const Color(0xFFD4C5FF),
+            ),
           ),
           Positioned(
             right: -120,
             top: 280,
-            child: _circle(240, const Color(0xFFDAD0FF)),
+            child: _circle(
+              240,
+              const Color(0xFFDAD0FF),
+            ),
           ),
           Positioned(
             bottom: -100,
             left: -80,
-            child: _circle(220, const Color(0xFFDCD2FF)),
+            child: _circle(
+              220,
+              const Color(0xFFDCD2FF),
+            ),
           ),
 
-          // Scrollable main screen prevents RenderFlex overflow
+          // Scrollable content prevents vertical overflow
           SafeArea(
             child: SingleChildScrollView(
+              keyboardDismissBehavior:
+              ScrollViewKeyboardDismissBehavior.onDrag,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                padding: const EdgeInsets.fromLTRB(
+                  20,
+                  8,
+                  20,
+                  24,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -101,7 +156,9 @@ class ImagePickerScreen extends ConsumerWidget {
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Settings coming soon'),
+                                content: Text(
+                                  'Settings coming soon',
+                                ),
                               ),
                             );
                           },
@@ -114,7 +171,7 @@ class ImagePickerScreen extends ConsumerWidget {
                       ],
                     ),
 
-                    const SizedBox(height: 0.05),
+                    const SizedBox(height: 4),
 
                     // Subtitle
                     const Text(
@@ -129,7 +186,7 @@ class ImagePickerScreen extends ConsumerWidget {
 
                     const SizedBox(height: 48),
 
-                    // Create New heading
+                    // Create New
                     const Text(
                       'CREATE NEW',
                       style: TextStyle(
@@ -141,10 +198,15 @@ class ImagePickerScreen extends ConsumerWidget {
 
                     const SizedBox(height: 22),
 
-                    // Create New options panel
+                    // Camera, Photo and Collage panel
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(12, 28, 12, 24),
+                      padding: const EdgeInsets.fromLTRB(
+                        12,
+                        28,
+                        12,
+                        24,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.82),
                         borderRadius: BorderRadius.circular(34),
@@ -158,7 +220,7 @@ class ImagePickerScreen extends ConsumerWidget {
                               color: const Color(0xFFBA8AFF),
                               onTap: state.isPicking
                                   ? null
-                                  : () => _openImage(
+                                  : () => _selectAndEditImage(
                                 context,
                                 ref,
                                 ImageSource.camera,
@@ -172,7 +234,7 @@ class ImagePickerScreen extends ConsumerWidget {
                               color: const Color(0xFFF46D9B),
                               onTap: state.isPicking
                                   ? null
-                                  : () => _openImage(
+                                  : () => _selectAndEditImage(
                                 context,
                                 ref,
                                 ImageSource.gallery,
@@ -199,27 +261,21 @@ class ImagePickerScreen extends ConsumerWidget {
                       ),
                     ),
 
-                    // Loading indicator
-                    if (state.isPicking) ...[
-                      const SizedBox(height: 18),
-                      const Center(
-                        child: CircularProgressIndicator(color: primary),
-                      ),
-                    ],
-
-                    // Image picker error
+                    // Show picker errors without adding a permanent section
                     if (state.errorMessage != null) ...[
                       const SizedBox(height: 12),
                       Text(
                         state.errorMessage!,
-                        style: const TextStyle(color: Colors.red),
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: 13,
+                        ),
                       ),
                     ],
 
-                    // Space before What's New
                     const SizedBox(height: 44),
 
-                    // What's New heading and All button
+                    // What's New heading
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -239,7 +295,9 @@ class ImagePickerScreen extends ConsumerWidget {
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('More features coming soon'),
+                                content: Text(
+                                  'More features coming soon',
+                                ),
                               ),
                             );
                           },
@@ -284,7 +342,9 @@ class ImagePickerScreen extends ConsumerWidget {
                             onTap: () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Filters coming soon'),
+                                  content: Text(
+                                    'Filters coming soon',
+                                  ),
                                 ),
                               );
                             },
@@ -304,7 +364,9 @@ class ImagePickerScreen extends ConsumerWidget {
                             onTap: () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Stickers coming soon'),
+                                  content: Text(
+                                    'Stickers coming soon',
+                                  ),
                                 ),
                               );
                             },
@@ -324,7 +386,9 @@ class ImagePickerScreen extends ConsumerWidget {
                             onTap: () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Templates coming soon'),
+                                  content: Text(
+                                    'Templates coming soon',
+                                  ),
                                 ),
                               );
                             },
@@ -339,12 +403,26 @@ class ImagePickerScreen extends ConsumerWidget {
               ),
             ),
           ),
+
+          // Loading spinner overlays the screen instead of
+          // increasing the height of the main Column.
+          if (state.isPicking)
+            Positioned.fill(
+              child: Container(
+                color: Colors.white.withValues(alpha: 0.15),
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    color: primary,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
   }
 
-  // Decorative background circle
+  // Decorative circle
   Widget _circle(double size, Color color) {
     return Container(
       width: size,
@@ -356,7 +434,7 @@ class ImagePickerScreen extends ConsumerWidget {
     );
   }
 
-  // Camera, Photo and Collage options
+  // Create New option button
   Widget _createOption({
     required IconData icon,
     required String label,
@@ -405,7 +483,7 @@ class ImagePickerScreen extends ConsumerWidget {
     );
   }
 
-  // Uniform feature cards
+  // Equal-sized feature cards
   Widget _featureCard({
     required String title,
     required String subtitle,
@@ -429,7 +507,9 @@ class ImagePickerScreen extends ConsumerWidget {
                 SizedBox(
                   height: 60,
                   width: double.infinity,
-                  child: Center(child: illustration),
+                  child: Center(
+                    child: illustration,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
