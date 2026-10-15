@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -28,12 +29,16 @@ class AuthService {
       await _auth.signInWithProvider(GoogleAuthProvider());
       return true;
     } on FirebaseAuthException catch (e) {
+      debugPrint('GOOGLE ERROR: ${e.code} | ${e.message}');
       if (e.code == 'canceled' ||
           e.code == 'web-context-canceled' ||
           e.code == 'popup-closed-by-user') {
         return false;
       }
       throw AuthException(_messageFor(e.code));
+    } catch (e) {
+      debugPrint('GOOGLE ERROR (other): $e');
+      rethrow;
     }
   }
 
@@ -58,7 +63,7 @@ class AuthService {
       case 'network-request-failed':
         return 'No internet connection.';
       default:
-        return 'Something went wrong. Please try again.';
+        return 'Something went wrong ($code). Please try again.';
     }
   }
 }
