@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
  
+import '../../editor/viewmodels/editor_notifier.dart';
+import '../../editor/views/editor_screen.dart';
 import '../viewmodels/picker_viewmodel.dart';
-import 'image_editor_screen.dart';
  
 class ImagePickerScreen extends ConsumerWidget {
   const ImagePickerScreen({super.key});
@@ -26,13 +27,15 @@ class ImagePickerScreen extends ConsumerWidget {
  
       if (!context.mounted || image == null) return;
  
+      final bytes = await image.file.readAsBytes();
+ 
+      if (!context.mounted) return;
+ 
+      ref.read(editorProvider.notifier).loadImage(bytes);
+ 
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (_) => ImageEditorScreen(
-            imagePath: image.path,
-          ),
-        ),
+        MaterialPageRoute(builder: (_) => const EditorScreen()),
       );
     } catch (e) {
       if (!context.mounted) return;
@@ -514,4 +517,3 @@ class ImagePickerScreen extends ConsumerWidget {
     );
   }
 }
- 
