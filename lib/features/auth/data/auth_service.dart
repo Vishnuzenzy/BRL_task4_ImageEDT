@@ -1,20 +1,42 @@
-/// Temporary auth service (NO real login yet).
-/// Step 2 will replace the body of [signIn] with Firebase Auth.
-/// The screens only call this class, so they won't need to change.
+import 'package:firebase_auth/firebase_auth.dart';
+
 class AuthService {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   Future<void> signIn({required String email, required String password}) async {
-    await Future.delayed(const Duration(seconds: 1)); // fake network wait
-    // Placeholder rule so we can test the error state:
-    if (password == 'wrong') {
-      throw const AuthException('Incorrect email or password.');
+    try {
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(_messageFor(e.code));
+    }
+  }
+
+  Future<void> signOut() => _auth.signOut();
+
+  String _messageFor(String code) {
+    switch (code) {
+      case 'invalid-credential':
+      case 'user-not-found':
+      case 'wrong-password':
+        return 'Incorrect email or password.';
+      case 'invalid-email':
+        return 'That email address is not valid.';
+      case 'user-disabled':
+        return 'This account has been disabled.';
+      case 'too-many-requests':
+        return 'Too many attempts. Try again later.';
+      case 'network-request-failed':
+        return 'No internet connection.';
+      default:
+        return 'Login failed. Please try again.';
     }
   }
 }
- 
+
 class AuthException implements Exception {
   const AuthException(this.message);
   final String message;
- 
+
   @override
   String toString() => message;
 }
