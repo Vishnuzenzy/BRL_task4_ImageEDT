@@ -1,8 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  bool _googleReady = false;
+
+  Future<void> _initGoogle() async {
+    if (_googleReady) return;
+    await GoogleSignIn.instance.initialize();
+    _googleReady = true;
+  }
 
   Future<void> signIn({required String email, required String password}) async {
     try {
@@ -26,23 +33,32 @@ class AuthService {
   /// Returns true if signed in, false if the user cancelled.
   Future<bool> signInWithGoogle() async {
     try {
-      await _auth.signInWithProvider(GoogleAuthProvider());
-      return true;
-    } on FirebaseAuthException catch (e) {
-      debugPrint('GOOGLE ERROR: ${e.code} | ${e.message}');
-      if (e.code == 'canceled' ||
-          e.code == 'web-context-canceled' ||
-          e.code == 'popup-closed-by-user') {
-        return false;
+      await _initGoogle();
+      final account = await GoogleSignIn.instance.authenticate();
+      final idToken = account.authentication.idToken;
+      if (idToken == null) {
+        throw const AuthException('Google sign-in failed. Please try again.');
       }
+      final credential = GoogleAuthProvider.credential(idToken: idToken);
+      await _auth.signInWithCredential(credential);
+      return true;
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) return false;
+      throw const AuthException('Google sign-in failed. Please try again.');
+    } on FirebaseAuthException catch (e) {
       throw AuthException(_messageFor(e.code));
-    } catch (e) {
-      debugPrint('GOOGLE ERROR (other): $e');
-      rethrow;
     }
   }
 
-  Future<void> signOut() => _auth.signOut();
+  Future<void> signOut() async {
+    try {
+      await _initGoogle();
+      await GoogleSignIn.instance.signOut();
+    } catch (_) {
+      // Ignore: the user may not have signed in with Google.
+    }
+    await _auth.signOut();
+  }
 
   String _messageFor(String code) {
     switch (code) {
@@ -63,7 +79,7 @@ class AuthService {
       case 'network-request-failed':
         return 'No internet connection.';
       default:
-        return 'Something went wrong ($code). Please try again.';
+        return 'Something went wrong. Please try again.';
     }
   }
 }
