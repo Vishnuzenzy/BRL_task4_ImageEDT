@@ -1,10 +1,13 @@
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../auth/data/auth_service.dart';
+import '../../auth/views/welcome_screen.dart';
+import '../../editor/viewmodels/editor_notifier.dart';
+import '../../editor/views/editor_screen.dart';
 import '../viewmodels/picker_viewmodel.dart';
-import 'image_editor_screen.dart';
 
 class ImagePickerScreen extends ConsumerWidget {
   const ImagePickerScreen({super.key});
@@ -14,40 +17,11 @@ class ImagePickerScreen extends ConsumerWidget {
   static const Color darkText = Color(0xFF30216F);
   static const Color mutedText = Color(0xFF7776AD);
 
-  Future<void> _openImage(
-      BuildContext context,
-      WidgetRef ref,
-      ImageSource source,
-      ) async {
-    try {
-      await ref
-          .read(pickerViewModelProvider.notifier)
-          .pickImage(source);
-
-      if (!context.mounted) return;
-
-      final state = ref.read(pickerViewModelProvider);
-
-      // The ViewModel should handle errors and loading state.
-      // Navigate to the editor only when an image was selected.
-      // If your ViewModel returns XFile? from pickImage, use:
-      // final image = await ref.read(...).pickImage(source);
-    } catch (e) {
-      if (!context.mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Unable to open image: $e'),
-        ),
-      );
-    }
-  }
-
   Future<void> _selectAndEditImage(
-      BuildContext context,
-      WidgetRef ref,
-      ImageSource source,
-      ) async {
+    BuildContext context,
+    WidgetRef ref,
+    ImageSource source,
+  ) async {
     try {
       final image = await ref
           .read(pickerViewModelProvider.notifier)
@@ -55,23 +29,54 @@ class ImagePickerScreen extends ConsumerWidget {
 
       if (!context.mounted || image == null) return;
 
+      final bytes = await image.file.readAsBytes();
+
+      if (!context.mounted) return;
+
+      ref.read(editorProvider.notifier).loadImage(bytes);
+
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (_) => ImageEditorScreen(
-            imagePath: image.path,
-          ),
-        ),
+        MaterialPageRoute(builder: (_) => const EditorScreen()),
       );
     } catch (e) {
       if (!context.mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Unable to select image: $e'),
-        ),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Unable to select image: $e')));
     }
+  }
+
+  // Account menu: shows the signed-in email and a Log out button.
+  void _showAccountSheet(BuildContext context) {
+    final email = FirebaseAuth.instance.currentUser?.email ?? 'Signed in';
+    showModalBottomSheet(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.person_outline),
+              title: Text(email),
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Log out'),
+              onTap: () async {
+                Navigator.pop(sheetContext);
+                await AuthService().signOut();
+                if (!context.mounted) return;
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+                  (route) => false,
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -87,40 +92,25 @@ class ImagePickerScreen extends ConsumerWidget {
           Positioned(
             top: -100,
             left: -100,
-            child: _circle(
-              250,
-              const Color(0xFFD4C5FF),
-            ),
+            child: _circle(250, const Color(0xFFD4C5FF)),
           ),
           Positioned(
             right: -120,
             top: 280,
-            child: _circle(
-              240,
-              const Color(0xFFDAD0FF),
-            ),
+            child: _circle(240, const Color(0xFFDAD0FF)),
           ),
           Positioned(
             bottom: -100,
             left: -80,
-            child: _circle(
-              220,
-              const Color(0xFFDCD2FF),
-            ),
+            child: _circle(220, const Color(0xFFDCD2FF)),
           ),
 
           // Scrollable content prevents vertical overflow
           SafeArea(
             child: SingleChildScrollView(
-              keyboardDismissBehavior:
-              ScrollViewKeyboardDismissBehavior.onDrag,
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  20,
-                  8,
-                  20,
-                  24,
-                ),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -153,15 +143,7 @@ class ImagePickerScreen extends ConsumerWidget {
                           ),
                         ),
                         IconButton(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Settings coming soon',
-                                ),
-                              ),
-                            );
-                          },
+                          onPressed: () => _showAccountSheet(context),
                           icon: const Icon(
                             Icons.settings,
                             color: darkText,
@@ -201,12 +183,7 @@ class ImagePickerScreen extends ConsumerWidget {
                     // Camera, Photo and Collage panel
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(
-                        12,
-                        28,
-                        12,
-                        24,
-                      ),
+                      padding: const EdgeInsets.fromLTRB(12, 28, 12, 24),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.82),
                         borderRadius: BorderRadius.circular(34),
@@ -221,10 +198,10 @@ class ImagePickerScreen extends ConsumerWidget {
                               onTap: state.isPicking
                                   ? null
                                   : () => _selectAndEditImage(
-                                context,
-                                ref,
-                                ImageSource.camera,
-                              ),
+                                      context,
+                                      ref,
+                                      ImageSource.camera,
+                                    ),
                             ),
                           ),
                           Expanded(
@@ -235,10 +212,10 @@ class ImagePickerScreen extends ConsumerWidget {
                               onTap: state.isPicking
                                   ? null
                                   : () => _selectAndEditImage(
-                                context,
-                                ref,
-                                ImageSource.gallery,
-                              ),
+                                      context,
+                                      ref,
+                                      ImageSource.gallery,
+                                    ),
                             ),
                           ),
                           Expanded(
@@ -266,10 +243,7 @@ class ImagePickerScreen extends ConsumerWidget {
                       const SizedBox(height: 12),
                       Text(
                         state.errorMessage!,
-                        style: const TextStyle(
-                          color: Colors.red,
-                          fontSize: 13,
-                        ),
+                        style: const TextStyle(color: Colors.red, fontSize: 13),
                       ),
                     ],
 
@@ -295,9 +269,7 @@ class ImagePickerScreen extends ConsumerWidget {
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text(
-                                  'More features coming soon',
-                                ),
+                                content: Text('More features coming soon'),
                               ),
                             );
                           },
@@ -342,9 +314,7 @@ class ImagePickerScreen extends ConsumerWidget {
                             onTap: () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text(
-                                    'Filters coming soon',
-                                  ),
+                                  content: Text('Filters coming soon'),
                                 ),
                               );
                             },
@@ -364,9 +334,7 @@ class ImagePickerScreen extends ConsumerWidget {
                             onTap: () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text(
-                                    'Stickers coming soon',
-                                  ),
+                                  content: Text('Stickers coming soon'),
                                 ),
                               );
                             },
@@ -386,9 +354,7 @@ class ImagePickerScreen extends ConsumerWidget {
                             onTap: () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text(
-                                    'Templates coming soon',
-                                  ),
+                                  content: Text('Templates coming soon'),
                                 ),
                               );
                             },
@@ -411,9 +377,7 @@ class ImagePickerScreen extends ConsumerWidget {
               child: Container(
                 color: Colors.white.withValues(alpha: 0.15),
                 child: const Center(
-                  child: CircularProgressIndicator(
-                    color: primary,
-                  ),
+                  child: CircularProgressIndicator(color: primary),
                 ),
               ),
             ),
@@ -456,17 +420,10 @@ class ImagePickerScreen extends ConsumerWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    color.withValues(alpha: 0.78),
-                    color,
-                  ],
+                  colors: [color.withValues(alpha: 0.78), color],
                 ),
               ),
-              child: Icon(
-                icon,
-                color: Colors.white,
-                size: 51,
-              ),
+              child: Icon(icon, color: Colors.white, size: 51),
             ),
             const SizedBox(height: 20),
             Text(
@@ -507,9 +464,7 @@ class ImagePickerScreen extends ConsumerWidget {
                 SizedBox(
                   height: 60,
                   width: double.infinity,
-                  child: Center(
-                    child: illustration,
-                  ),
+                  child: Center(child: illustration),
                 ),
                 const SizedBox(height: 8),
                 Text(

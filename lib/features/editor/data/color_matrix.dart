@@ -1,20 +1,20 @@
 import '../models/edit_state.dart';
-
+ 
 const _lumR = 0.213;
 const _lumG = 0.715;
 const _lumB = 0.072;
-
+ 
 /// 4x5 matrix (20 values) for ColorFilter.matrix.
 List<double> buildColorMatrix(EditState e) {
   final saturation = e.grayscale ? 0.0 : e.saturation;
-
+ 
   var m = _presetMatrix(e.filter);
   m = _then(m, _saturationMatrix(saturation));
   m = _then(m, _contrastMatrix(e.contrast));
   m = _then(m, _brightnessMatrix(e.brightness));
   return m;
 }
-
+ 
 List<double> _presetMatrix(FilterPreset p) {
   switch (p) {
     case FilterPreset.original:
@@ -47,7 +47,7 @@ List<double> _presetMatrix(FilterPreset p) {
       ];
   }
 }
-
+ 
 List<double> _saturationMatrix(double s) {
   final inv = 1 - s;
   return [
@@ -57,7 +57,7 @@ List<double> _saturationMatrix(double s) {
     0, 0, 0, 1, 0,
   ];
 }
-
+ 
 List<double> _contrastMatrix(double c) {
   final t = 128 * (1 - c);
   return [
@@ -67,7 +67,7 @@ List<double> _contrastMatrix(double c) {
     0, 0, 0, 1, 0,
   ];
 }
-
+ 
 List<double> _brightnessMatrix(double b) {
   final t = b * 255;
   return [
@@ -77,7 +77,7 @@ List<double> _brightnessMatrix(double b) {
     0, 0, 0, 1, 0,
   ];
 }
-
+ 
 /// Returns the matrix that applies [first] and then [second].
 List<double> _then(List<double> first, List<double> second) {
   final out = List<double>.filled(20, 0);

@@ -1,15 +1,14 @@
-
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'features/picker/views/image_picker_screen.dart';
+import 'features/auth/views/welcome_screen.dart';
+import 'firebase_options.dart';
 
-void main() {
-  runApp(
-    const ProviderScope(
-      child: ImageEDTApp(),
-    ),
-  );
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  runApp(const ProviderScope(child: ImageEDTApp()));
 }
 
 class ImageEDTApp extends StatelessWidget {
@@ -18,7 +17,7 @@ class ImageEDTApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PixelCraft',
+      title: 'ImageEDT',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -28,7 +27,7 @@ class ImageEDTApp extends StatelessWidget {
           brightness: Brightness.light,
         ),
       ),
-      home: const ImagePickerScreen(),
+      home: const WelcomeScreen(),
     );
   }
 }
