@@ -1,48 +1,19 @@
-
+ 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-
+ 
 import '../viewmodels/picker_viewmodel.dart';
 import 'image_editor_screen.dart';
-
+ 
 class ImagePickerScreen extends ConsumerWidget {
   const ImagePickerScreen({super.key});
-
+ 
   static const Color primary = Color(0xFF4F46E5);
   static const Color background = Color(0xFFEDE9FF);
   static const Color darkText = Color(0xFF30216F);
   static const Color mutedText = Color(0xFF7776AD);
-
-  Future<void> _openImage(
-      BuildContext context,
-      WidgetRef ref,
-      ImageSource source,
-      ) async {
-    try {
-      await ref
-          .read(pickerViewModelProvider.notifier)
-          .pickImage(source);
-
-      if (!context.mounted) return;
-
-      final state = ref.read(pickerViewModelProvider);
-
-      // The ViewModel should handle errors and loading state.
-      // Navigate to the editor only when an image was selected.
-      // If your ViewModel returns XFile? from pickImage, use:
-      // final image = await ref.read(...).pickImage(source);
-    } catch (e) {
-      if (!context.mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Unable to open image: $e'),
-        ),
-      );
-    }
-  }
-
+ 
   Future<void> _selectAndEditImage(
       BuildContext context,
       WidgetRef ref,
@@ -52,9 +23,9 @@ class ImagePickerScreen extends ConsumerWidget {
       final image = await ref
           .read(pickerViewModelProvider.notifier)
           .pickImage(source);
-
+ 
       if (!context.mounted || image == null) return;
-
+ 
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -65,7 +36,7 @@ class ImagePickerScreen extends ConsumerWidget {
       );
     } catch (e) {
       if (!context.mounted) return;
-
+ 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Unable to select image: $e'),
@@ -73,12 +44,12 @@ class ImagePickerScreen extends ConsumerWidget {
       );
     }
   }
-
+ 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(pickerViewModelProvider);
     final size = MediaQuery.sizeOf(context);
-
+ 
     return Scaffold(
       backgroundColor: background,
       body: Stack(
@@ -108,7 +79,7 @@ class ImagePickerScreen extends ConsumerWidget {
               const Color(0xFFDCD2FF),
             ),
           ),
-
+ 
           // Scrollable content prevents vertical overflow
           SafeArea(
             child: SingleChildScrollView(
@@ -170,9 +141,9 @@ class ImagePickerScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-
+ 
                     const SizedBox(height: 4),
-
+ 
                     // Subtitle
                     const Text(
                       'Turn your moments\ninto something beautiful ✨',
@@ -183,9 +154,9 @@ class ImagePickerScreen extends ConsumerWidget {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
-
+ 
                     const SizedBox(height: 48),
-
+ 
                     // Create New
                     const Text(
                       'CREATE NEW',
@@ -195,9 +166,9 @@ class ImagePickerScreen extends ConsumerWidget {
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-
+ 
                     const SizedBox(height: 22),
-
+ 
                     // Camera, Photo and Collage panel
                     Container(
                       width: double.infinity,
@@ -260,7 +231,7 @@ class ImagePickerScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
-
+ 
                     // Show picker errors without adding a permanent section
                     if (state.errorMessage != null) ...[
                       const SizedBox(height: 12),
@@ -272,9 +243,9 @@ class ImagePickerScreen extends ConsumerWidget {
                         ),
                       ),
                     ],
-
+ 
                     const SizedBox(height: 44),
-
+ 
                     // What's New heading
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -322,9 +293,9 @@ class ImagePickerScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-
+ 
                     const SizedBox(height: 16),
-
+ 
                     // Equal-width feature cards
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -396,14 +367,14 @@ class ImagePickerScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-
+ 
                     const SizedBox(height: 24),
                   ],
                 ),
               ),
             ),
           ),
-
+ 
           // Loading spinner overlays the screen instead of
           // increasing the height of the main Column.
           if (state.isPicking)
@@ -421,7 +392,7 @@ class ImagePickerScreen extends ConsumerWidget {
       ),
     );
   }
-
+ 
   // Decorative circle
   Widget _circle(double size, Color color) {
     return Container(
@@ -433,7 +404,7 @@ class ImagePickerScreen extends ConsumerWidget {
       ),
     );
   }
-
+ 
   // Create New option button
   Widget _createOption({
     required IconData icon,
@@ -482,7 +453,7 @@ class ImagePickerScreen extends ConsumerWidget {
       ),
     );
   }
-
+ 
   // Equal-sized feature cards
   Widget _featureCard({
     required String title,
@@ -543,3 +514,4 @@ class ImagePickerScreen extends ConsumerWidget {
     );
   }
 }
+ 
