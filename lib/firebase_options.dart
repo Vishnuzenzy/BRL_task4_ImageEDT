@@ -41,12 +41,11 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBSOP__DeDo5__rO0orYvPA88QCBkcDJ1M',
-    appId: '1:249272188711:android:d3b1322197e730f5eaf302',
-    messagingSenderId: '249272188711',
-    projectId: 'titan-39ae8',
-    databaseURL: 'https://titan-39ae8-default-rtdb.firebaseio.com',
-    storageBucket: 'titan-39ae8.firebasestorage.app',
+    apiKey: 'AIzaSyA26X9TUDwF91QFCWj2p8mcEatqCLjXMbM',
+    appId: '1:1020341275698:android:c709e78a1eaed7f774002b',
+    messagingSenderId: '1020341275698',
+    projectId: 'imageedt-1ff11',
+    storageBucket: 'imageedt-1ff11.firebasestorage.app',
   );
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCYwEgK8ocgnQ2poN1LbjDRv4V6r_iM1Kc',
