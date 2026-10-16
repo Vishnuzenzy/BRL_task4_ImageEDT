@@ -243,12 +243,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       backgroundColor: Colors.white,
                       foregroundColor: darkText,
                       side: BorderSide.none,
+                      elevation: 1,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18),
                       ),
                     ),
                     onPressed: _loading ? null : _google,
-                    icon: const Icon(Icons.g_mobiledata, size: 34),
+                    icon: Image.asset(
+                      'assets/icons/google.png',
+                      height: 24,
+                      width: 24,
+                    ),
                     label: const Text(
                       'Continue with Google',
                       style: TextStyle(
