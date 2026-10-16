@@ -253,6 +253,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       'assets/icons/google.png',
                       height: 24,
                       width: 24,
+                      errorBuilder: (context, error, stackTrace) =>
+                          Image.network(
+                            'https://developers.google.com/identity/images/g-logo.png',
+                            height: 24,
+                            width: 24,
+                          ),
                     ),
                     label: const Text(
                       'Continue with Google',
