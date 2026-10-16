@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/errors/app_exception.dart';
 import '../models/pick_result.dart';
+import '../../auth/views/settings_sheet.dart';
 
 class ImagePickerService {
   ImagePickerService({ImagePicker? picker})
