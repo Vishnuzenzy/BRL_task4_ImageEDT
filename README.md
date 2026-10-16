@@ -1,39 +1,68 @@
-# BRL_task4_ImageEDT
+# ImageEDT 📸✨
 
-ImageEDT is a simple, polished photo editor that lets users select an image, make basic edits, preview the result, and save the edited image to the device.
+> A cross-platform Flutter image manipulation and creative studio app built for seamless photo editing, cropping, and adjustments.
 
-Built in Flutter for App Development Probation, Task 4 (12-16 Oct 2026).
+---
 
-## Team and responsibilities
+## 🌟 Key Features
 
-| Member  | Responsibility |
-| ------- | -------------- |
-| Vishnu  | Repo lead, editing engine: edit state, adjustments, reset, rendering the final image |
-| Adityan | Image picker, permissions, crop, rotate, input error handling |
-| Sujal   | App shell and screens, preview, loading states, save/export, screenshots |
+- **Google Authentication & Firebase:** Secure cloud sign-in with official Google branding and session management.
+- **Image Picker & Camera:** Pick photos from gallery or capture directly using native camera integration.
+- **Photo Editing Suite:** Crop, rotate, brightness/contrast adjustments, and export features.
+- **Custom Studio UI:** Modern frosted glassmorphic theme with soft lavender aesthetic and customizable preferences.
+- **ImageEDT Pro Showcase:** Preview card for upcoming features (4K export, AI auto-retouch, stickers).
 
-## Features
+---
 
-- [ ] Select image from gallery
-- [ ] Crop and rotate
-- [ ] Adjustments: brightness, contrast, saturation, grayscale
-- [ ] Preview and reset
-- [ ] Save to device with success/failure message
-- [ ] Error handling (permission denied, invalid file, cancel, large images)
+## 🛠️ Tech Stack & Architecture
 
-## Packages
+- **Framework:** Flutter (Channel stable)
+- **Language:** Dart
+- **State Management:** Flutter Riverpod
+- **Backend Services:** Firebase Auth, Firebase Core
+- **Image Processing:** `image_picker`, `image_cropper`, `gal`
 
-To be filled as we add them.
+---
 
-## Setup
+## 👥 Team Contributors
 
-```bash
-git clone https://github.com/Vishnuzenzy/BRL_task4_ImageEDT.git
-cd BRL_task4_ImageEDT
+- **Vishnu Kumar** — Architecture, UI Testing Integration, Firebase Reconfiguration & Assets
+- **Sujal** — Authentication Flows & UI Design
+- **Adityan** — Login ,Firebase Backend Setup & Features
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Flutter SDK 3.x+
+- Android Studio / VS Code
+
+### Installation
+
+1. Clone the repository:
+   ```
+   git clone [https://github.com/Vishnuzenzy/BRL_task4_ImageEDT.git](https://github.com/Vishnuzenzy/BRL_task4_ImageEDT.git)
+   cd BRL_task4_ImageEDT
+   ```
+
+---
+
+1. Install dependencies:
+
 flutter pub get
+
+2. Configure launcher icons & Firebase:
+
+dart run flutter_launcher_icons
+flutterfire configure --platforms=android
+
+3. Run the application:
+
 flutter run
-```
 
-## Known limitations
+📦 Download APK
+Directly download the latest APK from the GitHub Releases section.
 
-To be filled at the end.
+---
